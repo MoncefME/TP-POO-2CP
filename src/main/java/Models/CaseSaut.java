@@ -8,11 +8,13 @@ public class CaseSaut extends Case{
 
     public CaseSaut() {
         color = "rgba(255, 151, 0, 0.68)";
+        className = "CaseParcours";
         step = Fonctions.randomInt(1,100);// the new position
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println("Jump clicked");
+            System.out.println(getId() + " un saut de " + step);
+            setClickedId(getId());
         });
     }
 }

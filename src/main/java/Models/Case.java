@@ -5,9 +5,28 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 public abstract class Case {
+    protected int id;
     protected String color;
     protected int step;
     protected int bonus;
+    public String className;
+    protected int clickedId = 0;
+
+    public int getClickedId() {
+        return clickedId;
+    }
+
+    public void setClickedId(int clickedId) {
+        this.clickedId = clickedId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     protected VBox caseVbox = new VBox();
 

@@ -162,6 +162,7 @@
                         <Label fx:id="userTopScore" alignment="CENTER" prefHeight="25.0" prefWidth="99.0" />
                      </children>
                   </HBox>
+                  <Label fx:id="clickLabel" alignment="CENTER" layoutX="248.0" layoutY="6.0" prefHeight="17.0" prefWidth="192.0" />
                </children>
             </AnchorPane>
          </top>

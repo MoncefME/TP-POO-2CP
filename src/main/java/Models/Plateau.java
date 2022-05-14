@@ -20,11 +20,7 @@ public class Plateau {
         this.plt = plt;
     }
 
-    public void showPlateau(){
-        for(int i=0 ; i<plt.length ; i++){
-            plt[i].hello();
-        }
-    }
+
 
     public Plateau() {
         //generation du tableua aide pour creation des cases du plateau
@@ -64,6 +60,7 @@ public class Plateau {
         for(int i = 0 ; i<10; i++){
             for (int j=0; j<10 ; j++){
                 int k = Fonctions.spiralPattern[i][j];
+                plt[k].setId(k);
                 VBox v = plt[k].getCaseVbox();
                 v.setStyle("-fx-background-color:"+plt[k].getColor()+";"+
                         "-fx-border-color : rgba(0,0,0,1);-fx-vgap: 5;-fx-hgap:5;"+
@@ -79,5 +76,6 @@ public class Plateau {
                 myGrid.add(v, j, i);
             }
         }
+        plt[0].getCaseVbox().getChildren().add(new Label("X"));
     }
 }
