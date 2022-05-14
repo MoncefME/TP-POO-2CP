@@ -96,24 +96,22 @@ public class MainAppView implements Initializable {
 
         jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
 
-
         /** Displaying UserInfo **/
         updateData(jeu);
 
-
         newUserBtn.setOnAction(event -> {
-            newUserPopUp.addNewPlayer(jeu);
+
+            newUserPopUp.addNewPlayer(jeu,myGrid);
             updateData(jeu);
         });
         newGameBtn.setOnMousePressed(event -> {
-
+            myGrid.getChildren().clear();
             rollBtn.setDisable(false);
             Partie my_Partie = new Partie();
             jeu.getMyCurrentPlayer().addPartie(my_Partie);
-            jeu.getMyCurrentPlayer().getMyCurrentPartie().setPlateau(new Plateau());
-            jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(0);
-
-
+            jeu.getMyCurrentPlayer().setMyCurrentPartie(my_Partie);
+            my_Partie.setPlateau(new Plateau());
+            System.out.println("new Game score "+jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore());
 
             /**Displaying the Grid**/
             jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
@@ -143,15 +141,15 @@ public class MainAppView implements Initializable {
           int gameScore = jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore();
           Plateau gamePlateau = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau();
 
-
           if(gamePosition<99){
               //updating the score of the current Partie
+              Case rolledCase =gamePlateau.getPlt()[gamePosition];
               jeu.getMyCurrentPlayer().getMyCurrentPartie().setScore(gameScore + gamePlateau.getPlt()[gamePosition].getBonus());
-              System.out.println("This Cell adds : " + gamePlateau.getPlt()[gamePosition].getBonus() + " $.");
+              System.out.println("This Cell adds : " + rolledCase.getBonus() + " $.");
               System.out.println("Current Score : " + jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore() + " $.");
 
               //updating the position of the current Partie
-              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(gamePosition + d1Score + d2Score );
+              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(gamePosition + d1Score + d2Score + rolledCase.getStep());
               System.out.println("Current Position : " + jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition() + " .");
 
               //updating the Text of the currentScore && the currentPos of the Partie
@@ -162,16 +160,17 @@ public class MainAppView implements Initializable {
               gamePlateau.getPlt()[gamePosition].getCaseVbox().getChildren().add(visitedTic);
 
               System.out.println("-------------");
+              updateData(jeu);
 
           }else {
+              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(99);
               jeu.endJeu();
               rollBtn.setDisable(true);
-              gamePosition = 0;
               System.out.println("gameScore: "+gameScore);
               jeu.getMyCurrentPlayer().setBestScore(Math.max(gameScore,jeu.getMyCurrentPlayer().getBestScore()));
+              updateData(jeu);
           }
       });
-
         /**Displaying the List of Players or the list of games**/
       showPartieList.setOnMouseClicked(event -> {
           partieListView.setItems(FXCollections.observableArrayList(jeu.getMyCurrentPlayer().getMesParties()));
@@ -182,7 +181,5 @@ public class MainAppView implements Initializable {
       showPlayerBtn.setOnMouseClicked(event -> {
           playerListView.setItems(FXCollections.observableArrayList(jeu.getPlayers()));
       });
-
-
     }
 }

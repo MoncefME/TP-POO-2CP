@@ -6,12 +6,13 @@ import Models.Partie;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class newUserPopUp {
-    public static void addNewPlayer(Jeu jeu){
+    public static void addNewPlayer(Jeu jeu, GridPane myGrid){
         Stage window = new Stage();
         window.initModality(Modality.APPLICATION_MODAL);
         window.setTitle("ADD new User");
@@ -31,6 +32,8 @@ public class newUserPopUp {
                 j.setNom(textField.getText() );
                 jeu.setMyCurrentPlayer(j);
                 Partie newP = new Partie();
+                myGrid.getChildren().clear();
+                newP.getPlateau().showPlateu(myGrid);
                 j.setMyCurrentPartie(newP);
                 j.addPartie(newP);
                 jeu.addPlayer(j);
