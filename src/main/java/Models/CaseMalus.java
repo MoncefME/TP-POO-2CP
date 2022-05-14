@@ -7,12 +7,14 @@ public class CaseMalus extends Case{
     }
 
     public CaseMalus() {
-        color = "rgba(230, 4, 4, 1)";//red
+        color = "rgba(230, 4, 4, 0.9)";//red
+        className = "CaseMalus";
         step = -2;
         bonus = -10;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println("Malus clicked");
+            System.out.println(getId());
+            setClickedId(getId());
         });
     }
 }

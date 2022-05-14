@@ -9,7 +9,8 @@ public class CaseImage extends CaseQuestion{
     private boolean answer;
 
     public CaseImage() {
-        color = "rgba(255, 115, 239, 1)";
+        color = "rgba(255, 115, 239, 0.6)";
+        className = "CaseImage";
         if(answer==true){
             step = 2;
             bonus = 10;
@@ -19,7 +20,8 @@ public class CaseImage extends CaseQuestion{
         }
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println("Image clicked");
+            System.out.println(getId());
+            setClickedId(getId());
         });
     }
 }

@@ -12,11 +12,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 import java.lang.invoke.CallSite;
 import java.net.URL;
@@ -53,7 +55,8 @@ public class MainAppView implements Initializable {
     private Label gameTopScore;
     @FXML
     private Label userTopScore;
-
+    @FXML
+    private Label clickLabel;
 
     @FXML
     private Button showPlayerBtn;
@@ -76,6 +79,7 @@ public class MainAppView implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
+
         Jeu jeu = new Jeu();
         Joueur joueur = new Joueur(true);
 
@@ -87,33 +91,31 @@ public class MainAppView implements Initializable {
         }else{//Un joueur deja existant  , son nom deja dans la liste des joueurs
             joueur = jeu.getPlayerByName(joueur.getNom());
             jeu.setMyCurrentPlayer(joueur);
-            if(joueur == null) System.out.println("The player does not exist");
+            if(joueur == null) System.out.println("The player does exist");
         }
 
         /** Starting the game **/
-        rollBtn.setDisable(true);
+        //rollBtn.setDisable(true);
         jeu.lancerJeu(joueur);
+        Boolean currentCaseClicked = false;
 
         jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
-
 
         /** Displaying UserInfo **/
         updateData(jeu);
 
-
         newUserBtn.setOnAction(event -> {
-            newUserPopUp.addNewPlayer(jeu);
+            newUserPopUp.addNewPlayer(jeu,myGrid);
             updateData(jeu);
         });
-        newGameBtn.setOnMousePressed(event -> {
-
+        newGameBtn.setOnAction(event -> {
+            myGrid.getChildren().clear();
             rollBtn.setDisable(false);
             Partie my_Partie = new Partie();
             jeu.getMyCurrentPlayer().addPartie(my_Partie);
-            jeu.getMyCurrentPlayer().getMyCurrentPartie().setPlateau(new Plateau());
-            jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(0);
-
-
+            jeu.getMyCurrentPlayer().setMyCurrentPartie(my_Partie);
+            my_Partie.setPlateau(new Plateau());
+            System.out.println("new Game score "+jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore());
 
             /**Displaying the Grid**/
             jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
@@ -123,7 +125,8 @@ public class MainAppView implements Initializable {
 
       });
 
-      rollBtn.setOnMouseClicked(event -> {
+      rollBtn.setOnAction(event -> {
+
           Label visitedTic = new Label("X" );
 
           /** Rolling the Two Dices **/
@@ -138,40 +141,94 @@ public class MainAppView implements Initializable {
             dice2Label.setText(d2Score+"");
             dice2Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d2Score+".png")));
 
+            Partie currentParite = jeu.getMyCurrentPlayer().getMyCurrentPartie();
+          clickLabel.setText("Click the case number : "+ currentParite.getPosition()+d1Score+d2Score);
+
+
+          if(currentParite.getPlateau().getPlt()[currentParite.getPosition()+d1Score+d2Score]
+                  .getClickedId() == currentParite.getPosition()+d1Score+d2Score){
+              clickLabel.setText("You clicked the right case");
+              clickLabel.setTextFill(Color.GREEN);
+          }else {
+              clickLabel.setText("You clicked the wrong case");
+              clickLabel.setTextFill(Color.RED);
+          }
           //Just shortcuts to not write maPartie.getPosition && maPartie.getScore;
           int gamePosition = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition();
           int gameScore = jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore();
           Plateau gamePlateau = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau();
+          Case[] currentPlt = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().getPlt();
+          updateData(jeu);
 
+          if(gamePosition+d1Score+d2Score<=99){
 
-          if(gamePosition<99){
               //updating the score of the current Partie
-              jeu.getMyCurrentPlayer().getMyCurrentPartie().setScore(gameScore + gamePlateau.getPlt()[gamePosition].getBonus());
-              System.out.println("This Cell adds : " + gamePlateau.getPlt()[gamePosition].getBonus() + " $.");
-              System.out.println("Current Score : " + jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore() + " $.");
+              gamePosition += d1Score + d2Score;
 
-              //updating the position of the current Partie
-              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(gamePosition + d1Score + d2Score );
-              System.out.println("Current Position : " + jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition() + " .");
+              Case rolledCase =gamePlateau.getPlt()[gamePosition];
 
-              //updating the Text of the currentScore && the currentPos of the Partie
-              currentScore.setText(gameScore+"");
-              currentPosition.setText(gamePosition+"");
+
+
+              Boolean questionAnswer = false;
+              switch (rolledCase.className){
+                  case "CaseImage":
+                      if(ImageQuestionController.showImageQuestion(jeu)){
+                          System.out.println("Image true");
+                          gamePosition += 2;
+                          gameScore += 10;
+                      }else {
+                          System.out.println("Image false");
+                          //gamePosition += 0;
+                      }
+                      break;
+                  case "CaseDefinition":
+                      if(DefinitionQuestionController.showDefinitionQuestoin(jeu)){
+                          System.out.println("Def true");
+                          gameScore += 20;
+                          gamePosition +=4;
+                      }else {
+                          System.out.println("Def false");
+                          //gamePosition += 0;
+                      }
+                      break;
+                  case "CaseSaut":
+                      System.out.println("CASE SAUT");
+                      gameScore += rolledCase.getBonus();
+                      if(gamePosition + rolledCase.getStep() >99){
+                          System.out.println("CASE SAUT dangerous hard");
+                          gamePosition = 99;
+                          jeu.endJeu();
+                          rollBtn.setDisable(true);
+                      }
+                      else {
+                          System.out.println("Jump j");
+                          gamePosition = rolledCase.getStep();
+                      }
+
+                      break;
+                  default:
+                      //updating the score of the current Partie
+                      gameScore += rolledCase.getBonus();
+                      gamePosition += rolledCase.getBonus();
+                      break;
+              }
+
+              jeu.getMyCurrentPlayer().getMyCurrentPartie().setScore(gameScore);
+              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(gamePosition);
 
               //adding the tic to the current Cell
               gamePlateau.getPlt()[gamePosition].getCaseVbox().getChildren().add(visitedTic);
-
-              System.out.println("-------------");
+              updateData(jeu);
 
           }else {
+              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(99);
               jeu.endJeu();
               rollBtn.setDisable(true);
-              gamePosition = 0;
               System.out.println("gameScore: "+gameScore);
               jeu.getMyCurrentPlayer().setBestScore(Math.max(gameScore,jeu.getMyCurrentPlayer().getBestScore()));
+              updateData(jeu);
           }
       });
-
         /**Displaying the List of Players or the list of games**/
       showPartieList.setOnMouseClicked(event -> {
           partieListView.setItems(FXCollections.observableArrayList(jeu.getMyCurrentPlayer().getMesParties()));
@@ -182,7 +239,5 @@ public class MainAppView implements Initializable {
       showPlayerBtn.setOnMouseClicked(event -> {
           playerListView.setItems(FXCollections.observableArrayList(jeu.getPlayers()));
       });
-
-
     }
 }

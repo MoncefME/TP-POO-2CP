@@ -10,6 +10,7 @@ public class CaseDefinition extends CaseQuestion {
 
     public CaseDefinition() {
         color = "rgba(0, 135, 255, 1)";
+        className = "CaseDefinition";
         if(answer==true){
             step = 4;
             bonus = 20;
@@ -18,7 +19,8 @@ public class CaseDefinition extends CaseQuestion {
             bonus = -10 ;
         }
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println("Definition clicked");
+            System.out.println(getId());
+            setClickedId(getId());
         });
     }
 }

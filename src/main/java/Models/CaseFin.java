@@ -7,12 +7,14 @@ public class CaseFin extends Case{
     }
 
     public CaseFin() {
-        color = "rgba(0, 0, 0, 1)";
+        color = "rgba(0, 0, 0, 0.6)";
+        className = "ClassFin";
         step = 0;
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println("Fin clicked");
+            System.out.println(getId());
+            setClickedId(getId());
         });
     }
 }

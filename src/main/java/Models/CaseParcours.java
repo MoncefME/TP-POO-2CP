@@ -8,11 +8,13 @@ public class CaseParcours extends Case{
 
     public CaseParcours() {
         color = "#ffffff";// white
+        className = "CaseParcours";
         step = 0;
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println("Parcours clicked");
+            System.out.println(getId());
+            setClickedId(getId());
         });
     }
 }
