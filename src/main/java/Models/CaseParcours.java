@@ -10,5 +10,9 @@ public class CaseParcours extends Case{
         color = "#ffffff";// white
         step = 0;
         bonus = 0;
+
+        caseVbox.setOnMouseClicked(event -> {
+            System.out.println("Parcours clicked");
+        });
     }
 }

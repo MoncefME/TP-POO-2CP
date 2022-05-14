@@ -10,5 +10,8 @@ public class CaseDepart extends Case{
         color = "rgba(255, 215, 0, 1)";//jaune
         step = 0;
         bonus = 0;
+        caseVbox.setOnMouseClicked(event -> {
+            System.out.println("Depart clicked");
+        });
     }
 }

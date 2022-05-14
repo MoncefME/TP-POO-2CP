@@ -10,5 +10,9 @@ public class CaseSaut extends Case{
         color = "rgba(255, 151, 0, 0.68)";
         step = Fonctions.randomInt(1,100);// the new position
         bonus = 0;
+
+        caseVbox.setOnMouseClicked(event -> {
+            System.out.println("Jump clicked");
+        });
     }
 }

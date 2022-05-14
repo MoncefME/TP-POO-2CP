@@ -1,10 +1,11 @@
 package Models;
 
 public class Partie {
+    private String  idPartie;
     private int score;
     private int position;
     private Plateau plateau;
-    private Joueur joueur;
+
 
     public int getPosition() {
         return position;
@@ -27,17 +28,17 @@ public class Partie {
         this.plateau = plateau;
     }
 
-    public Joueur getJoueur() {
-        return joueur;
+    public String getIdPartie() {
+        return idPartie;
     }
-    public void setJoueur(Joueur joueur) {
-        this.joueur = joueur;
+    public void setIdPartie(String idPartie) {
+        this.idPartie = idPartie;
     }
 
-    public Partie(Joueur joueur) {
+    public Partie() {
         this.score = 0;// le score de la partie
+        this.position = 0;
         this.plateau = new Plateau();
-        this.joueur = joueur;
-
+        this.idPartie = "";
     }
 }

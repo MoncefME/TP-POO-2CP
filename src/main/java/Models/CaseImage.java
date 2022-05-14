@@ -17,5 +17,9 @@ public class CaseImage extends CaseQuestion{
             step = 0;
             bonus = 0 ;
         }
+
+        caseVbox.setOnMouseClicked(event -> {
+            System.out.println("Image clicked");
+        });
     }
 }

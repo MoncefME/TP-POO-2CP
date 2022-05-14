@@ -17,5 +17,8 @@ public class CaseDefinition extends CaseQuestion {
             step = 0;
             bonus = -10 ;
         }
+        caseVbox.setOnMouseClicked(event -> {
+            System.out.println("Definition clicked");
+        });
     }
 }

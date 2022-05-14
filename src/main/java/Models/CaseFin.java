@@ -10,5 +10,9 @@ public class CaseFin extends Case{
         color = "rgba(0, 0, 0, 1)";
         step = 0;
         bonus = 0;
+
+        caseVbox.setOnMouseClicked(event -> {
+            System.out.println("Fin clicked");
+        });
     }
 }
