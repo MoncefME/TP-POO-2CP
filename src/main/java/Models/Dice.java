@@ -1,7 +1,7 @@
 package Models;
 
 public class Dice {
-    private int value;
+    private int value = 0;
 
     public int getValue() {
         return value;
@@ -11,7 +11,7 @@ public class Dice {
         this.value = value;
     }
 
-    public int lancer(){
-        return Fonctions.randomInt(1,6);
+    public void lancer(){
+        value = Fonctions.randomInt(1,6);
     }
 }

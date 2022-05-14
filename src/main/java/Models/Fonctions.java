@@ -74,4 +74,6 @@ public final class Fonctions {
             "-fx-border-width: 0 0 0 5 ;",//LeftVertical 7
             "-fx-border-width: 5 0 5 5 ;"//the last one 8
     };
+
+
 }

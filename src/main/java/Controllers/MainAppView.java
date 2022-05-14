@@ -1,8 +1,8 @@
 package Controllers;
 
-import Models.Fonctions;
-import Models.Jeu;
-import Models.Plateau;
+import Models.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -27,22 +28,23 @@ public class MainAppView implements Initializable {
     @FXML
     private GridPane myGrid;
     @FXML
-    private Button randomizeBtn;
+    private Button newGameBtn;
     @FXML
-    private Button rollButton;
+    private Button rollBtn;
     @FXML
-    private Label dice1Label;
+    private Button newUserBtn;
+
+    @FXML
+    private Label dice1Label ;
     @FXML
     private ImageView dice1Image;
-
     @FXML
-    private Label userName;
-
-    @FXML
-    private Label dice2Label;
+    private Label dice2Label ;
     @FXML
     private ImageView dice2Image;
 
+    @FXML
+    private Label userName;
     @FXML
     private Label currentScore;
     @FXML
@@ -51,97 +53,135 @@ public class MainAppView implements Initializable {
     private Label gameTopScore;
     @FXML
     private Label userTopScore;
+
+
     @FXML
-    private TextField texInput;
+    private Button showPlayerBtn;
+    @FXML
+    private ListView<Joueur> playerListView;
+    @FXML
+    private Button showPartieList;
+    @FXML
+    private ListView<Partie> partieListView;
 
 
-//    private Image dice1png = new Image(getClass().getResourceAsStream("/Images.dice/dice1.png"));
-//    private Image dice2png = new Image(getClass().getResourceAsStream("/Images.dice/dice2.png"));
-//    private Image dice3png = new Image(getClass().getResourceAsStream("/Images.dice/dice3.png"));
-//    private Image dice4png = new Image(getClass().getResourceAsStream("/Images.dice/dice4.png"));
-//    private Image dice5png = new Image(getClass().getResourceAsStream("/Images.dice/dice5.png"));
-//    private Image dice6png = new Image(getClass().getResourceAsStream("/Images.dice/dice6.png"));
-
-
+    public void updateData(Jeu jeu){
+        userName.setText(jeu.getMyCurrentPlayer().getNom());
+        gameTopScore.setText(String.valueOf(jeu.getGameTopScore()));
+        userTopScore.setText(String.valueOf(jeu.getMyCurrentPlayer().getBestScore()));
+        currentScore.setText(String.valueOf(jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore()));
+        currentPosition.setText(String.valueOf(jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition()));
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         Jeu jeu = new Jeu();
-        jeu.lancerJeu();
+        Joueur joueur = new Joueur(true);
+
+        /**Checking if the player is new or already exists**/
+        if(!jeu.playerExists(joueur)){// New player , his name is not in the game PlayerList
+            jeu.addPlayer(joueur);
+            jeu.setMyCurrentPlayer(joueur);
+            System.out.println( joueur.getNom()+" <NEW_PLAYER>");
+        }else{//Un joueur deja existant  , son nom deja dans la liste des joueurs
+            joueur = jeu.getPlayerByName(joueur.getNom());
+            jeu.setMyCurrentPlayer(joueur);
+            if(joueur == null) System.out.println("The player does not exist");
+        }
+
+        /** Starting the game **/
+        rollBtn.setDisable(true);
+        jeu.lancerJeu(joueur);
+
+        jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
 
 
-        userName.setText(jeu.getPartie().getJoueur().getNom());
-        gameTopScore.setText(String.valueOf(Jeu.gameTopScore));
-        userTopScore.setText(String.valueOf(jeu.getPartie().getJoueur().getBestScore()));
+        /** Displaying UserInfo **/
+        updateData(jeu);
 
-        randomizeBtn.setOnMousePressed(event -> {
-            jeu.getPartie().setPlateau(new Plateau());
 
+        newUserBtn.setOnAction(event -> {
+            newUserPopUp.addNewPlayer(jeu);
+            updateData(jeu);
         });
+        newGameBtn.setOnMousePressed(event -> {
 
-      randomizeBtn.setOnMouseClicked(event -> {
-          Plateau p = jeu.getPartie().getPlateau();
+            rollBtn.setDisable(false);
+            Partie my_Partie = new Partie();
+            jeu.getMyCurrentPlayer().addPartie(my_Partie);
+            jeu.getMyCurrentPlayer().getMyCurrentPartie().setPlateau(new Plateau());
+            jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(0);
 
 
-          for(int i = 0 ; i<10; i++){
-              for (int j=0; j<10 ; j++){
-                  int k = Fonctions.spiralPattern[i][j];
-                  VBox v = p.getPlt()[k].getCaseVbox();
-                  v.setStyle("-fx-background-color:"+p.getPlt()[k].getColor()+";"+
-                          "-fx-border-color : rgba(0,0,0,1);-fx-vgap: 5;-fx-hgap:5;"+
-                          "-fx-border-width: 0;-fx-border-insets: 0, 20;-fx-padding:5;"+
-                          Fonctions.caseBorderStyle[Fonctions.spiralBorderPattern[i][j]]+
-                          "-fx-border-radius: 3;"
-                  );
 
-                  v.setAlignment(Pos.CENTER);
-                  //v.setSpacing(5);
-                  Label l1 = new Label(k+"");
-                  Label l2 = new Label(p.getPlt()[k].getBonus()+"$ "+" +"+p.getPlt()[k].getStep());
-                  v.getChildren().add(l1);
+            /**Displaying the Grid**/
+            jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
 
-                  myGrid.add(v, j, i);
+            /****/
+            updateData(jeu);
 
-              }
-          }
       });
 
-      rollButton.setOnMouseClicked(event -> {
-          Label l3 = new Label("X" );
+      rollBtn.setOnMouseClicked(event -> {
+          Label visitedTic = new Label("X" );
 
-          int d1Score = Jeu.d1.lancer();
-          int d2Score = Jeu.d2.lancer();
-          dice1Label.setText(d1Score+"");
-          dice2Label.setText(d2Score+"");
+          /** Rolling the Two Dices **/
+          //Dice1
+          Jeu.d1.lancer();
+            int d1Score = Jeu.d1.getValue();
+            dice1Label.setText(d1Score+"");
+            dice1Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d1Score+".png")));
+          //Dice2
+          Jeu.d2.lancer();
+            int d2Score = Jeu.d2.getValue();
+            dice2Label.setText(d2Score+"");
+            dice2Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d2Score+".png")));
 
-//          dice1Image.setImage(dice1png);
-//          dice2Image.setImage(dice6png);
-
-           dice1Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d1Score+".png")));
-          dice2Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d2Score+".png")));
-
-          int gamePos = jeu.getPartie().getPosition();
-          int gameScore = jeu.getPartie().getScore();
+          //Just shortcuts to not write maPartie.getPosition && maPartie.getScore;
+          int gamePosition = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition();
+          int gameScore = jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore();
+          Plateau gamePlateau = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau();
 
 
-          if(gamePos<99){
+          if(gamePosition<99){
+              //updating the score of the current Partie
+              jeu.getMyCurrentPlayer().getMyCurrentPartie().setScore(gameScore + gamePlateau.getPlt()[gamePosition].getBonus());
+              System.out.println("This Cell adds : " + gamePlateau.getPlt()[gamePosition].getBonus() + " $.");
+              System.out.println("Current Score : " + jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore() + " $.");
 
-              jeu.getPartie().setScore(gameScore + jeu.getPartie().getPlateau().getPlt()[gamePos].getBonus());
-              System.out.println(jeu.getPartie().getPlateau().getPlt()[gamePos].getBonus());
-              jeu.getPartie().setPosition(gamePos +d1Score + d2Score);
-              currentScore.setText(jeu.getPartie().getScore()+"");
-              currentPosition.setText(jeu.getPartie().getPosition()+"");
+              //updating the position of the current Partie
+              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(gamePosition + d1Score + d2Score );
+              System.out.println("Current Position : " + jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition() + " .");
 
-              jeu.getPartie().getPlateau().getPlt()[gamePos].getCaseVbox().getChildren().add(l3);
+              //updating the Text of the currentScore && the currentPos of the Partie
+              currentScore.setText(gameScore+"");
+              currentPosition.setText(gamePosition+"");
+
+              //adding the tic to the current Cell
+              gamePlateau.getPlt()[gamePosition].getCaseVbox().getChildren().add(visitedTic);
+
+              System.out.println("-------------");
 
           }else {
               jeu.endJeu();
-              gamePos = 0;
-              jeu.getPartie().getJoueur().setBestScore(Math.max(gameScore,jeu.getPartie().getJoueur().getBestScore()));
+              rollBtn.setDisable(true);
+              gamePosition = 0;
+              System.out.println("gameScore: "+gameScore);
+              jeu.getMyCurrentPlayer().setBestScore(Math.max(gameScore,jeu.getMyCurrentPlayer().getBestScore()));
           }
       });
 
+        /**Displaying the List of Players or the list of games**/
+      showPartieList.setOnMouseClicked(event -> {
+          partieListView.setItems(FXCollections.observableArrayList(jeu.getMyCurrentPlayer().getMesParties()));
+          System.out.println("-monCurrentJoueur : "+ jeu.getMyCurrentPlayer().getNom());
+          System.out.println("-maCurrentPartie : "+ jeu.getMyCurrentPlayer().getMyCurrentPartie().getIdPartie());
+          System.out.println("-maCurrentPartieListSize : "+ jeu.getMyCurrentPlayer().getMesParties().size());
+      });
+      showPlayerBtn.setOnMouseClicked(event -> {
+          playerListView.setItems(FXCollections.observableArrayList(jeu.getPlayers()));
+      });
 
 
     }
