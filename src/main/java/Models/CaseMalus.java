@@ -1,20 +1,19 @@
 package Models;
 
-public class CaseMalus extends Case{
-    @Override
-    public String hello() {
-        return "[M]";
-    }
+import Controllers.MainAppView;
+
+import java.io.Serializable;
+
+public class CaseMalus extends Case implements Serializable {
 
     public CaseMalus() {
-        color = "rgba(230, 4, 4, 0.9)";//red
+        color = "rgba(230, 4, 4, 1)";//red
         className = "CaseMalus";
         step = -2;
         bonus = -10;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

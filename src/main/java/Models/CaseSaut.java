@@ -1,20 +1,18 @@
 package Models;
 
-public class CaseSaut extends Case{
-    @Override
-    public String hello() {
-        return "[S]";
-    }
+import Controllers.MainAppView;
+import java.io.Serializable;
+
+public class CaseSaut extends Case implements Serializable {
 
     public CaseSaut() {
-        color = "rgba(255, 151, 0, 0.68)";
-        className = "CaseParcours";
-        step = Fonctions.randomInt(1,100);// the new position
+        color = "rgba(255, 146, 0, 1)";
+        className = "CaseSaut";
+        step = Fonctions.randomInt(2,98);// the new position
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId() + " un saut de " + step);
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

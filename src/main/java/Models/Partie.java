@@ -1,6 +1,9 @@
 package Models;
 
-public class Partie {
+import java.io.Serializable;
+
+public class Partie implements Serializable {
+
     private String  idPartie;
     private int score;
     private int position;
@@ -35,10 +38,10 @@ public class Partie {
         this.idPartie = idPartie;
     }
 
-    public Partie() {
+    public Partie(Boolean b) {
         this.score = 0;// le score de la partie
         this.position = 0;
-        this.plateau = new Plateau();
+        this.plateau = new Plateau(b);
         this.idPartie = "";
     }
 }

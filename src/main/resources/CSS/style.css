@@ -1,0 +1,65 @@
+
+.body{
+-fx-background-color:rgba(244, 252, 91, 0.8)
+}
+
+.buttons{
+-fx-background-radius:10;
+-fx-border-width : 2;
+-fx-border-radius:11;
+
+}
+.button1{
+-fx-background-color:rgba(255, 198, 32, 0.8);
+-fx-border-color:rgba(255, 198, 32, 1);
+}
+.button2{
+-fx-background-color:rgba(0, 167, 197, 0.8);
+-fx-border-color:rgba(0, 167, 197, 1);
+}
+.button3{
+-fx-background-color:rgba(235, 5, 0, 0.4);
+-fx-border-color:rgba(235, 5, 0, 1);
+}
+.list{
+-fx-background-color:transparent;
+}
+.list-cell {
+   -fx-padding: 5;
+   -fx-background-color:transparent;
+   -fx-font: 20pt "Arial";
+   -fx-alignment: center;
+   -fx-background-radius:5;
+   -fx-border-radius:5;
+ }
+
+.list-cell:selected {
+-fx-padding:5;
+-fx-background-color: rgba(209, 155, 208, 0.8);
+-fx-background-radius:10;
+}
+.list-cell:selected {
+-fx-padding:5;
+-fx-background-color: rgba(209, 155, 208, 0.8);
+-fx-background-radius:10;
+}
+.list-cell:empty {
+  visibility:hidden;
+}
+
+.list-view .scroll-bar:vertical {
+    -fx-background-color:transparent;
+}
+
+.list-view .increment-button ,.list-view .decrement-button {
+    -fx-background-color:transparent;
+    -fx-border-color:transparent;
+}
+
+.list-view .scroll-bar:vertical .thumb {
+    -fx-background-color:rgba(219, 113, 189, 1);
+    -fx-background-insets: 5, 5, 5;
+    -fx-background-radius: 5;
+}
+
+
