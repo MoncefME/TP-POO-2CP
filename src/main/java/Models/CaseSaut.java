@@ -8,7 +8,7 @@ public class CaseSaut extends Case{
 
     public CaseSaut() {
         color = "rgba(255, 151, 0, 0.68)";
-        className = "CaseParcours";
+        className = "CaseSaut";
         step = Fonctions.randomInt(1,100);// the new position
         bonus = 0;
 
