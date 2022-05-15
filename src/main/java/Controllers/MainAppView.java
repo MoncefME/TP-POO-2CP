@@ -19,6 +19,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.lang.invoke.CallSite;
 import java.net.URL;
@@ -97,7 +98,6 @@ public class MainAppView implements Initializable {
         /** Starting the game **/
         //rollBtn.setDisable(true);
         jeu.lancerJeu(joueur);
-        Boolean currentCaseClicked = false;
 
         jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
 
@@ -128,6 +128,8 @@ public class MainAppView implements Initializable {
       rollBtn.setOnAction(event -> {
 
           Label visitedTic = new Label("X" );
+          visitedTic.setFont(new Font(16));
+          visitedTic.setStyle("-fx-font-weight: bold");
 
           /** Rolling the Two Dices **/
           //Dice1
@@ -141,33 +143,42 @@ public class MainAppView implements Initializable {
             dice2Label.setText(d2Score+"");
             dice2Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d2Score+".png")));
 
-            Partie currentParite = jeu.getMyCurrentPlayer().getMyCurrentPartie();
-          clickLabel.setText("Click the case number : "+ currentParite.getPosition()+d1Score+d2Score);
-
-
-          if(currentParite.getPlateau().getPlt()[currentParite.getPosition()+d1Score+d2Score]
-                  .getClickedId() == currentParite.getPosition()+d1Score+d2Score){
-              clickLabel.setText("You clicked the right case");
-              clickLabel.setTextFill(Color.GREEN);
-          }else {
-              clickLabel.setText("You clicked the wrong case");
-              clickLabel.setTextFill(Color.RED);
-          }
-          //Just shortcuts to not write maPartie.getPosition && maPartie.getScore;
+          Partie currentParite = jeu.getMyCurrentPlayer().getMyCurrentPartie();
+          clickLabel.setText("Click the case number : "+ (currentParite.getPosition()+d1Score+d2Score));
           int gamePosition = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition();
           int gameScore = jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore();
           Plateau gamePlateau = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau();
           Case[] currentPlt = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().getPlt();
-          updateData(jeu);
 
+
+          /**Setting the Click Property of the Target Case **/
           if(gamePosition+d1Score+d2Score<=99){
+          currentPlt[gamePosition+d1Score+d2Score].getCaseVbox().onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
+              @Override
+              public void handle(MouseEvent event) {
+                  if(currentPlt[currentParite.getPosition()+d1Score+d2Score].getId() == currentParite.getPosition()+d1Score+d2Score){
+                      clickLabel.setText("You clicked the right case # "+ currentPlt[currentParite.getPosition()+d1Score+d2Score].getId());
+                      clickLabel.setTextFill(Color.GREEN);
+                      jeu.setCorrectClickedCase(true);
+                  }
+              }
+          });
+          }else {
+                jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(99);
+                jeu.endJeu();
+                rollBtn.setDisable(true);
+                System.out.println("gameScore: "+gameScore);
+                jeu.getMyCurrentPlayer().setBestScore(Math.max(gameScore,jeu.getMyCurrentPlayer().getBestScore()));
+                updateData(jeu);
+          }
+
+          /**If the Target Case is Clicked Correctrly**/
+          if(jeu.getCorrectClickedCase()){
 
               //updating the score of the current Partie
               gamePosition += d1Score + d2Score;
-
+              updateData(jeu);
               Case rolledCase =gamePlateau.getPlt()[gamePosition];
-
-
 
               Boolean questionAnswer = false;
               switch (rolledCase.className){
@@ -217,18 +228,23 @@ public class MainAppView implements Initializable {
               jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(gamePosition);
 
               //adding the tic to the current Cell
+              if(gamePosition<0)gamePosition = 0;
+              gamePlateau.getPlt()[gamePosition].getCaseVbox().getChildren().remove(0);
               gamePlateau.getPlt()[gamePosition].getCaseVbox().getChildren().add(visitedTic);
+
               updateData(jeu);
+              jeu.setCorrectClickedCase(false);
 
           }else {
-              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(99);
-              jeu.endJeu();
-              rollBtn.setDisable(true);
-              System.out.println("gameScore: "+gameScore);
-              jeu.getMyCurrentPlayer().setBestScore(Math.max(gameScore,jeu.getMyCurrentPlayer().getBestScore()));
-              updateData(jeu);
+              clickLabel.setText("You clicked the wrong case # " + currentPlt[currentParite.getPosition()+d1Score+d2Score].getId() );
+              clickLabel.setTextFill(Color.RED);
           }
+
       });
+
+
+
+
         /**Displaying the List of Players or the list of games**/
       showPartieList.setOnMouseClicked(event -> {
           partieListView.setItems(FXCollections.observableArrayList(jeu.getMyCurrentPlayer().getMesParties()));

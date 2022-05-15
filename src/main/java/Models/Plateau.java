@@ -5,6 +5,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,10 +69,12 @@ public class Plateau {
                         Fonctions.caseBorderStyle[Fonctions.spiralBorderPattern[i][j]]+
                         "-fx-border-radius: 3;"
                 );
-                v.setAlignment(Pos.CENTER);
+                v.setAlignment(Pos.TOP_CENTER);
                 //v.setSpacing(5);
                 Label l1 = new Label(k+"");
-                Label l2 = new Label(plt[k].getBonus()+"$ "+" +"+plt[k].getStep());
+                l1.setFont(new Font("Cambria", 10));
+                l1.setAlignment(Pos.TOP_RIGHT);
+                //Label l2 = new Label(plt[k].getBonus()+"$ "+" +"+plt[k].getStep());
                 v.getChildren().add(l1);
                 myGrid.add(v, j, i);
             }
