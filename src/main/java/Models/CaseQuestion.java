@@ -1,6 +1,8 @@
 package Models;
 
-public abstract class CaseQuestion extends Case{
+import java.io.Serializable;
+
+public abstract class CaseQuestion extends Case implements Serializable {
     public String question;
     public Boolean answer;
 

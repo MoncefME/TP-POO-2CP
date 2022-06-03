@@ -1,6 +1,10 @@
 package Models;
 
-public class CaseFin extends Case{
+import Controllers.MainAppView;
+
+import java.io.Serializable;
+
+public class CaseFin extends Case implements Serializable {
     @Override
     public String hello() {
         return "[F]";
@@ -13,8 +17,7 @@ public class CaseFin extends Case{
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

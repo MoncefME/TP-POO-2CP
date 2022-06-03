@@ -1,6 +1,10 @@
 package Models;
 
-public class CaseDepart extends Case{
+import Controllers.MainAppView;
+
+import java.io.Serializable;
+
+public class CaseDepart extends Case implements Serializable {
     @Override
     public String hello() {
         return "[d]";
@@ -12,8 +16,7 @@ public class CaseDepart extends Case{
         step = 0;
         bonus = 0;
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

@@ -2,258 +2,503 @@ package Controllers;
 
 import Models.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
-import java.lang.invoke.CallSite;
+import java.io.*;
 import java.net.URL;
-import java.time.temporal.JulianFields;
 import java.util.ResourceBundle;
 
 public class MainAppView implements Initializable {
-
+    /*************FXML Elements******************/
     @FXML
     private GridPane myGrid;
-    @FXML
-    private Button newGameBtn;
-    @FXML
-    private Button rollBtn;
-    @FXML
-    private Button newUserBtn;
-
-    @FXML
-    private Label dice1Label ;
-    @FXML
-    private ImageView dice1Image;
-    @FXML
-    private Label dice2Label ;
-    @FXML
-    private ImageView dice2Image;
-
-    @FXML
-    private Label userName;
     @FXML
     private Label currentScore;
     @FXML
     private Label currentPosition;
     @FXML
-    private Label gameTopScore;
+    private Button newGameBtn;
+    @FXML
+    private Button rollBtn;
+    @FXML
+    private ImageView dice1Image;
+    @FXML
+    private Label dice1Label;
+    @FXML
+    private ImageView dice2Image;
+    @FXML
+    private Label dice2Label;
+    @FXML
+    private Label userName;
+    @FXML
+    private Label clickLabel;
+    @FXML
+    private Button homeBtn;
+    @FXML
+    private Button helpBtn;
+    @FXML
+    private Button leaderBoard;
+    @FXML
+    private Label addedPoint1;
     @FXML
     private Label userTopScore;
     @FXML
-    private Label clickLabel;
+    private Label gameOver;
 
-    @FXML
-    private Button showPlayerBtn;
-    @FXML
-    private ListView<Joueur> playerListView;
-    @FXML
-    private Button showPartieList;
-    @FXML
-    private ListView<Partie> partieListView;
-
-
-    public void updateData(Jeu jeu){
+    /****************Functions*******************/
+    public void updateData(Jeu jeu) {
         userName.setText(jeu.getMyCurrentPlayer().getNom());
-        gameTopScore.setText(String.valueOf(jeu.getGameTopScore()));
         userTopScore.setText(String.valueOf(jeu.getMyCurrentPlayer().getBestScore()));
         currentScore.setText(String.valueOf(jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore()));
         currentPosition.setText(String.valueOf(jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition()));
     }
 
+    public void addingTic(Jeu jeu, int type) {
+
+        Label visitedTic = new Label();
+        switch (type) {
+            case 1://normale X
+                visitedTic.setText("X");
+                break;
+            case 2://go forward
+                visitedTic.setText("F");
+                break;
+            case 3://go backward
+                visitedTic.setText("B");
+                break;
+            case 4://jump high
+                visitedTic.setText("J");
+                break;
+        }
+        visitedTic.setFont(new Font(10));
+        visitedTic.setStyle("-fx-font-weight: bold");
+        Label number = new Label(jeu.getCurrentPlt()[jeu.getCurrentPosition()].getId()+"");
+        /**********************Adding the tic to the current case************/
+        if (jeu.getCurrentPosition() <= 99 && jeu.getCurrentPosition() >= 0) {
+            jeu.getCurrentPlt()[jeu.getCurrentPosition()].getCaseVbox().getChildren().clear();
+            jeu.getCurrentPlt()[jeu.getCurrentPosition()].
+                    getCaseVbox().getChildren().add(number);
+            jeu.getCurrentPlt()[jeu.getCurrentPosition()].getCaseVbox().getChildren().add(visitedTic);
+        }
+        /*******************************************************************/
+    }
+
+    public boolean stopCondition(String targetCaseClass) {
+        if (targetCaseClass.equals("CaseParcours")) return false;
+        else if (stuck) return false;
+        else if (targetCaseClass.equals("CaseFin"))return false;
+        else return true;
+    }
+
+    public void CaseOutOfLimit(Jeu jeu) {
+        jeu.getCurrentPartie().setPosition(99);
+        jeu.endJeu();
+        stuck = true;
+        myGrid.setOpacity(0.5);
+        gameOver.setVisible(true);
+        rollBtn.setDisable(true);
+        clickLabel.setVisible(false);
+        System.out.println("gameScore: " + jeu.getCurrentScore());
+        jeu.getMyCurrentPlayer().setBestScore(Math.max(jeu.getCurrentScore(), jeu.getMyCurrentPlayer().getBestScore()));
+        System.out.println("CurrentPlayer topScore: " + jeu.getMyCurrentPlayer().getBestScore());
+        updateData(jeu);
+        addingTic(jeu, 1);
+
+    }
+
+    /**************Static Elements****************/
+    public static Stage window;
+    public static FXMLLoader fxmlLoader;
+    public static Scene scene;
+    public static Boolean stuck = false;
+    public static Jeu game = new Jeu();
+    public static int clickedCASE ;
+    public static Jeu jeu;
+    public static Joueur joueur;
+    public static File file;
+    /********************************************/
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        game = jeu;
 
-
-        Jeu jeu = new Jeu();
-        Joueur joueur = new Joueur(true);
-
-        /**Checking if the player is new or already exists**/
-        if(!jeu.playerExists(joueur)){// New player , his name is not in the game PlayerList
-            jeu.addPlayer(joueur);
-            jeu.setMyCurrentPlayer(joueur);
-            System.out.println( joueur.getNom()+" <NEW_PLAYER>");
-        }else{//Un joueur deja existant  , son nom deja dans la liste des joueurs
-            joueur = jeu.getPlayerByName(joueur.getNom());
-            jeu.setMyCurrentPlayer(joueur);
-            if(joueur == null) System.out.println("The player does exist");
+        if (jeu.getCurrentPosition()==99) {
+            CaseOutOfLimit(jeu);
         }
-
-        /** Starting the game **/
-        //rollBtn.setDisable(true);
-        jeu.lancerJeu(joueur);
-
-        jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
+        jeu.getCurrentPlateau().showPlateu(myGrid);
 
         /** Displaying UserInfo **/
         updateData(jeu);
+        addingTic(jeu, 1);
 
-        newUserBtn.setOnAction(event -> {
-            newUserPopUp.addNewPlayer(jeu,myGrid);
-            updateData(jeu);
-        });
+        /******************Buttons**********************/
         newGameBtn.setOnAction(event -> {
+
+            clickLabel.setVisible(false);
+            dice1Image.setImage(null);
+            dice2Image.setImage(null);
+            gameOver.setVisible(false);
             myGrid.getChildren().clear();
             rollBtn.setDisable(false);
-            Partie my_Partie = new Partie();
-            jeu.getMyCurrentPlayer().addPartie(my_Partie);
+            Partie my_Partie = new Partie(true);
             jeu.getMyCurrentPlayer().setMyCurrentPartie(my_Partie);
-            my_Partie.setPlateau(new Plateau());
-            System.out.println("new Game score "+jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore());
+            my_Partie.setPlateau(new Plateau(true));
+            System.out.println("new Game score " + jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore());
 
             /**Displaying the Grid**/
             jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().showPlateu(myGrid);
+            myGrid.setOpacity(1);
+            gameOver.setVisible(false);
 
             /****/
             updateData(jeu);
+            addingTic(jeu, 1);
+        });        //
+        helpBtn.setOnMouseClicked(event -> {
+            fxmlLoader = new FXMLLoader(
+                    getClass().getResource("/Views/HelpView.fxml"));
+            try {
+                scene = new Scene(fxmlLoader.load());
+                window = new Stage();
+                window.initModality(Modality.APPLICATION_MODAL);
+                window.setTitle("Help , Rules");
+                window.setScene(scene);
+                window.showAndWait();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });     //
+        homeBtn.setOnMouseClicked(event -> {
+            Stage stage;
+            Parent root;
+            stage = (Stage) homeBtn.getScene().getWindow();
+            try {
+                root = FXMLLoader.load(getClass().getResource("/Views/HomeScreen.fxml"));
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });     //
+        leaderBoard.setOnMouseClicked(event -> {
+            System.out.println("saved");
+            jeu.getMyCurrentPlayer().addPartie(jeu.getMyCurrentPlayer().getMyCurrentPartie());
+            try {
+                ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File("jeu.json"))));
+                for (Joueur j: jeu.getPlayers()) {
+                    for (Partie p:j.getMesParties()) {
+                        Plateau plateau=new Plateau();
+                        plateau.setPltint(p.getPlateau().getPltint());
+                        p.setPlateau(plateau);
+                    }
+                }
+                out.writeObject(jeu);
+                System.out.println("The Object  was succesfully written to a file");
+                out.close();
+            }
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }); //
+        /***********************************************/
+        /***************************** Meat Coade ********************************/
+        rollBtn.setOnAction(event -> {
+            newGameBtn.setDisable(true);
+            leaderBoard.setDisable(true);
+            final boolean[] verified = {true};
+            /** Rolling the Two Dices **/
+            /**Dice1*/Jeu.d1.lancer();int d1Score = Jeu.d1.getValue();
+            dice1Label.setText(d1Score + "");
+            dice1Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice" + d1Score + ".png")));
+            /**Dice2*/Jeu.d2.lancer();int d2Score = Jeu.d2.getValue();
+            dice2Label.setText(d2Score + "");
+            dice2Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice" + d2Score + ".png")));
 
-      });
+            rollBtn.setDisable(true);
+            clickLabel.setTextFill(Color.BLACK);
+            clickLabel.setText("Click the case number : " + (jeu.getCurrentPosition() + d1Score + d2Score));
+            if(jeu.getCurrentPosition() + d1Score + d2Score < 99) {
+                clickLabel.setVisible(true);
+            }
+            /******************Real Time var************/
+            int gamePosition = jeu.getCurrentPosition();
 
-      rollBtn.setOnAction(event -> {
-
-          Label visitedTic = new Label("X" );
-          visitedTic.setFont(new Font(16));
-          visitedTic.setStyle("-fx-font-weight: bold");
-
-          /** Rolling the Two Dices **/
-          //Dice1
-          Jeu.d1.lancer();
-            int d1Score = Jeu.d1.getValue();
-            dice1Label.setText(d1Score+"");
-            dice1Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d1Score+".png")));
-          //Dice2
-          Jeu.d2.lancer();
-            int d2Score = Jeu.d2.getValue();
-            dice2Label.setText(d2Score+"");
-            dice2Image.setImage(new Image(getClass().getResourceAsStream("/dice/dice"+d2Score+".png")));
-
-          Partie currentParite = jeu.getMyCurrentPlayer().getMyCurrentPartie();
-          clickLabel.setText("Click the case number : "+ (currentParite.getPosition()+d1Score+d2Score));
-          int gamePosition = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPosition();
-          int gameScore = jeu.getMyCurrentPlayer().getMyCurrentPartie().getScore();
-          Plateau gamePlateau = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau();
-          Case[] currentPlt = jeu.getMyCurrentPlayer().getMyCurrentPartie().getPlateau().getPlt();
+            final Case[] targetCase = new Case[1];
+            /******************************************/
 
 
-          /**Setting the Click Property of the Target Case **/
-          if(gamePosition+d1Score+d2Score<=99){
-          currentPlt[gamePosition+d1Score+d2Score].getCaseVbox().onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
-              @Override
-              public void handle(MouseEvent event) {
-                  if(currentPlt[currentParite.getPosition()+d1Score+d2Score].getId() == currentParite.getPosition()+d1Score+d2Score){
-                      clickLabel.setText("You clicked the right case # "+ currentPlt[currentParite.getPosition()+d1Score+d2Score].getId());
-                      clickLabel.setTextFill(Color.GREEN);
-                      jeu.setCorrectClickedCase(true);
-                  }
-              }
-          });
-          }else {
-                jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(99);
-                jeu.endJeu();
-                rollBtn.setDisable(true);
-                System.out.println("gameScore: "+gameScore);
-                jeu.getMyCurrentPlayer().setBestScore(Math.max(gameScore,jeu.getMyCurrentPlayer().getBestScore()));
+            /**Setting the Click Property of the Target Case **/
+            if (gamePosition + d1Score + d2Score < 99) {
+                /*****Target Case exists***/
+                targetCase[0] = jeu.getCurrentPlt()[jeu.getCurrentPosition() + d1Score + d2Score];
+                myGrid.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        if(clickedCASE != targetCase[0].getId() && verified[0]){
+                            clickLabel.setText("You clicekd the wrong Case " + clickedCASE);
+                            clickLabel.setTextFill(Color.RED);//updating ClickLabel
+                            clickLabel.setVisible(true);
+                        }else
+                        if (verified[0]){
+                            jeu.getCurrentPlt()[jeu.getCurrentPosition()].getCaseVbox().getChildren().remove(1);
+
+                            clickLabel.setTextFill(Color.GREEN);//updating ClickLabel
+                            jeu.getCurrentPartie().setPosition(jeu.getCurrentPosition() + d1Score + d2Score);
+                            updateData(jeu);
+                            clickLabel.setText("You clicked the right case # " + jeu.getCurrentPosition());
+                            clickLabel.setVisible(true);
+                            String targetCaseClass;
+                            stuck = false;
+                            /***************************Action on the target Case ************************************/
+                            do {
+                                targetCaseClass = targetCase[0].getClassName();
+                                System.out.println(targetCaseClass);
+                                System.out.println("*********************************");
+                                System.out.println("CurrentPos 1 : " + jeu.getCurrentPosition());
+                                System.out.println("TargetCaseClass1 : " + targetCaseClass);
+                                System.out.println("*********************************");//Displaying infos
+                                switch (targetCaseClass) {
+                                    case "CaseImage":
+                                        fxmlLoader = new FXMLLoader(
+                                                getClass().getResource("/Views/ImageQuestionView.fxml"));
+                                        try {
+                                            scene = new Scene(fxmlLoader.load());
+                                            window = new Stage();
+                                            window.initModality(Modality.APPLICATION_MODAL);
+                                            window.setTitle("Image Question");
+                                            window.setScene(scene);
+                                            window.showAndWait();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        if (ImageQuestionController.qAnswer) {
+                                            stuck = false;
+                                            System.out.println("Image true");
+                                            jeu.incrementCurrentPosition(2);
+                                            jeu.incrementCurrentScore(10);
+                                        } else {
+                                            //This is illegal but to prevent stucking on the same case
+                                            addingTic(jeu, 1);
+                                            stuck = true;
+                                            System.out.println("Image false");
+                                        }
+                                        updateData(jeu);
+                                        break;
+                                    case "CaseDefinition":
+                                        fxmlLoader = new FXMLLoader(
+                                                getClass().getResource("/Views/DefinitionQuestionView.fxml"));
+                                        try {
+                                            scene = new Scene(fxmlLoader.load());
+                                            window = new Stage();
+                                            window.initModality(Modality.APPLICATION_MODAL);
+                                            window.setTitle("Definition Question");
+                                            window.setScene(scene);
+                                            window.showAndWait();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        if (DefinitionQuestionController.qAnswer) {
+                                            stuck = false;
+                                            System.out.println("Def true");
+                                            jeu.incrementCurrentPosition(4);
+                                            jeu.incrementCurrentScore(20);
+                                        } else {
+                                            //This is illegal but to prevent stucking on the same case
+                                            addingTic(jeu, 1);
+                                            stuck = true;
+                                            System.out.println("Def false");
+                                        }
+                                        updateData(jeu);
+                                        break;
+                                    case "CaseSaut":
+                                        System.out.println("CASE SAUT");
+                                        System.out.println("Jump to ->  " + jeu.getCurrentPlt()
+                                                [jeu.getCurrentPosition()].getStep());
+                                        int jump_pos=Fonctions.randomInt(2,98);
+                                        jeu.getCurrentPartie().setPosition(jump_pos);
+                                        stuck = false;
+                                        updateData(jeu);
+                                        break;
+                                    case "CaseMalus":
+                                        System.out.println("Case Malus , go back bb");
+                                        jeu.incrementCurrentPosition(-2);
+                                        jeu.incrementCurrentScore(-10);
+                                        updateData(jeu);
+                                        break;
+                                    case "CaseBonus":
+                                        System.out.println("Case Bonus , LuckyUU");
+                                        jeu.incrementCurrentPosition(2);
+                                        jeu.incrementCurrentScore(10);
+                                        updateData(jeu);
+                                        break;
+                                    case "CaseParcours":
+                                        //updating the score of the current Partie
+                                        addingTic(jeu, 1);
+                                        updateData(jeu);
+                                        break;
+                                }//end of switch statement
+
+                                if (jeu.getCurrentPosition() <= 99) {
+                                    targetCase[0] = jeu.getCurrentPlt()[jeu.getCurrentPosition()];} else {CaseOutOfLimit(jeu);}
+                                System.out.println("*********************************");
+                                System.out.println("CurrentPos 2 : " + jeu.getCurrentPosition());
+                                System.out.println("TargetCaseClass2 : " + targetCaseClass);
+                                System.out.println("*********************************");//Displaying Infos
+                            } while (stopCondition(targetCaseClass));
+                            System.out.println("outside While");
+                            if(jeu.getCurrentPosition() < 99) {
+                                rollBtn.setDisable(false);
+                                newGameBtn.setDisable(false);
+                                leaderBoard.setDisable(false);
+                                verified[0] =false;
+                            }else {
+                                rollBtn.setDisable(true);
+                                newGameBtn.setDisable(false);
+                                leaderBoard.setDisable(false);
+                            }
+                        }
+                        }
+                });
+
+                /*******************************************/
+
+            }/*****gamePosition + d1scre + d2score >99 ( indexOutOfBound )***/
+            else if (gamePosition + d1Score + d2Score > 99){
+                targetCase[0] = jeu.getCurrentPlt()[99 - d1Score - d2Score];
+                jeu.getCurrentPartie().setPosition(99 - d1Score - d2Score);
                 updateData(jeu);
-          }
+                String targetCaseClass = targetCase[0].getClassName();
+                stuck = false;
+                /***************************Action on the target Case ************************************/
+                do {
+                    targetCaseClass = targetCase[0].getClassName();
+                    System.out.println(targetCaseClass);
+                    System.out.println("*********************************");
+                    System.out.println("CurrentPos 1 : " + jeu.getCurrentPosition());
+                    System.out.println("TargetCaseClass1 : " + targetCaseClass);
+                    System.out.println("*********************************");//Displaying infos
+                    switch (targetCaseClass) {
+                        case "CaseImage":
+                            fxmlLoader = new FXMLLoader(
+                                    getClass().getResource("/Views/ImageQuestionView.fxml"));
+                            try {
+                                scene = new Scene(fxmlLoader.load());
+                                window = new Stage();
+                                window.initModality(Modality.APPLICATION_MODAL);
+                                window.setTitle("Image Question");
+                                window.setScene(scene);
+                                window.showAndWait();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            if (ImageQuestionController.qAnswer) {
+                                stuck = false;
+                                System.out.println("Image true");
+                                jeu.incrementCurrentPosition(2);
+                                jeu.incrementCurrentScore(10);
+                            } else {
+                                //This is illegal but to prevent stucking on the same case
+                                addingTic(jeu, 1);
+                                stuck = true;
+                                System.out.println("Image false");
+                            }
+                            updateData(jeu);
+                            break;
+                        case "CaseDefinition":
+                            fxmlLoader = new FXMLLoader(
+                                    getClass().getResource("/Views/DefinitionQuestionView.fxml"));
+                            try {
+                                scene = new Scene(fxmlLoader.load());
+                                window = new Stage();
+                                window.initModality(Modality.APPLICATION_MODAL);
+                                window.setTitle("Definition Question");
+                                window.setScene(scene);
+                                window.showAndWait();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            if (DefinitionQuestionController.qAnswer) {
+                                stuck = false;
+                                System.out.println("Def true");
+                                jeu.incrementCurrentPosition(4);
+                                jeu.incrementCurrentScore(20);
+                            } else {
+                                //This is illegal but to prevent stucking on the same case
+                                addingTic(jeu, 1);
+                                stuck = true;
+                                System.out.println("Def false");
+                            }
+                            updateData(jeu);
+                            break;
+                        case "CaseSaut":
+                            System.out.println("CASE SAUT");
+                            System.out.println("Jump to ->  " + jeu.getCurrentPlt()
+                                    [jeu.getCurrentPosition()].getStep());
+                            int jump_pos=Fonctions.randomInt(2,98);
+                            jeu.getCurrentPartie().setPosition(jump_pos);
+                            stuck = false;
+                            updateData(jeu);
+                            break;
+                        case "CaseMalus":
+                            System.out.println("Case Malus , go back bb");
+                            jeu.incrementCurrentPosition(-2);
+                            jeu.incrementCurrentScore(-10);
+                            updateData(jeu);
+                            break;
+                        case "CaseBonus":
+                            System.out.println("Case Bonus , LuckyUU");
+//                                        addingTic(jeu, 2);
+                            jeu.incrementCurrentPosition(2);
+                            jeu.incrementCurrentScore(10);
+                            updateData(jeu);
+                            break;
+                        case "CaseParcours":
+                            //updating the score of the current Partie
+                            addingTic(jeu, 1);
+                            updateData(jeu);
+                            break;
+                    }//end of switch statement
 
-          /**If the Target Case is Clicked Correctrly**/
-          if(jeu.getCorrectClickedCase()){
-
-              //updating the score of the current Partie
-              gamePosition += d1Score + d2Score;
-              updateData(jeu);
-              Case rolledCase =gamePlateau.getPlt()[gamePosition];
-
-              Boolean questionAnswer = false;
-              switch (rolledCase.className){
-                  case "CaseImage":
-                      if(ImageQuestionController.showImageQuestion(jeu)){
-                          System.out.println("Image true");
-                          gamePosition += 2;
-                          gameScore += 10;
-                      }else {
-                          System.out.println("Image false");
-                          //gamePosition += 0;
-                      }
-                      break;
-                  case "CaseDefinition":
-                      if(DefinitionQuestionController.showDefinitionQuestoin(jeu)){
-                          System.out.println("Def true");
-                          gameScore += 20;
-                          gamePosition +=4;
-                      }else {
-                          System.out.println("Def false");
-                          //gamePosition += 0;
-                      }
-                      break;
-                  case "CaseSaut":
-                      System.out.println("CASE SAUT");
-                      gameScore += rolledCase.getBonus();
-                      if(gamePosition + rolledCase.getStep() >99){
-                          System.out.println("CASE SAUT dangerous hard");
-                          gamePosition = 99;
-                          jeu.endJeu();
-                          rollBtn.setDisable(true);
-                      }
-                      else {
-                          System.out.println("Jump j");
-                          gamePosition = rolledCase.getStep();
-                      }
-
-                      break;
-                  default:
-                      //updating the score of the current Partie
-                      gameScore += rolledCase.getBonus();
-                      gamePosition += rolledCase.getBonus();
-                      break;
-              }
-
-              jeu.getMyCurrentPlayer().getMyCurrentPartie().setScore(gameScore);
-              jeu.getMyCurrentPlayer().getMyCurrentPartie().setPosition(gamePosition);
-
-              //adding the tic to the current Cell
-              if(gamePosition<0)gamePosition = 0;
-              gamePlateau.getPlt()[gamePosition].getCaseVbox().getChildren().remove(0);
-              gamePlateau.getPlt()[gamePosition].getCaseVbox().getChildren().add(visitedTic);
-
-              updateData(jeu);
-              jeu.setCorrectClickedCase(false);
-
-          }else {
-              clickLabel.setText("You clicked the wrong case # " + currentPlt[currentParite.getPosition()+d1Score+d2Score].getId() );
-              clickLabel.setTextFill(Color.RED);
-          }
-
-      });
-
-
-
-
-        /**Displaying the List of Players or the list of games**/
-      showPartieList.setOnMouseClicked(event -> {
-          partieListView.setItems(FXCollections.observableArrayList(jeu.getMyCurrentPlayer().getMesParties()));
-          System.out.println("-monCurrentJoueur : "+ jeu.getMyCurrentPlayer().getNom());
-          System.out.println("-maCurrentPartie : "+ jeu.getMyCurrentPlayer().getMyCurrentPartie().getIdPartie());
-          System.out.println("-maCurrentPartieListSize : "+ jeu.getMyCurrentPlayer().getMesParties().size());
-      });
-      showPlayerBtn.setOnMouseClicked(event -> {
-          playerListView.setItems(FXCollections.observableArrayList(jeu.getPlayers()));
-      });
+                    if (jeu.getCurrentPosition() <= 99) {
+                        targetCase[0] = jeu.getCurrentPlt()[jeu.getCurrentPosition()];} else {CaseOutOfLimit(jeu);}
+                    System.out.println("*********************************");
+                    System.out.println("CurrentPos 2 : " + jeu.getCurrentPosition());
+                    System.out.println("TargetCaseClass2 : " + targetCaseClass);
+                    System.out.println("*********************************");//Displaying Infos
+                } while (stopCondition(targetCaseClass));
+                System.out.println("outside While");
+                if(jeu.getCurrentPosition() < 99) {
+                    rollBtn.setDisable(false);
+                    newGameBtn.setDisable(false);
+                    leaderBoard.setDisable(false);
+                    verified[0] =false;
+                }else {
+                    rollBtn.setDisable(true);
+                    newGameBtn.setDisable(false);
+                    leaderBoard.setDisable(false);
+                }
+            }
+            else{CaseOutOfLimit(jeu);}
+        });//the main and the biggest part of code
+        /*************************************************************************/
     }
 }

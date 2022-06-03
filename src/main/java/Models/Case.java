@@ -4,13 +4,22 @@ package Models;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public abstract class Case {
+import java.io.Serializable;
+
+public abstract class Case implements Serializable {
     protected int id;
     protected String color;
     protected int step;
     protected int bonus;
     public String className;
     protected int clickedId = 0;
+
+    public String getClassName() {
+        return className;
+    }
+    public void setClassName(String className) {
+        this.className = className;
+    }
 
     public int getClickedId() {
         return clickedId;

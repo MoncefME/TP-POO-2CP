@@ -1,6 +1,10 @@
 package Models;
 
-public class CaseSaut extends Case{
+import Controllers.MainAppView;
+
+import java.io.Serializable;
+
+public class CaseSaut extends Case implements Serializable {
     @Override
     public String hello() {
         return "[S]";
@@ -9,12 +13,11 @@ public class CaseSaut extends Case{
     public CaseSaut() {
         color = "rgba(255, 151, 0, 0.68)";
         className = "CaseSaut";
-        step = Fonctions.randomInt(1,100);// the new position
+        step = Fonctions.randomInt(2,98);// the new position
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId() + " un saut de " + step);
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

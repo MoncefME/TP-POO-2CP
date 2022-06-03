@@ -32,7 +32,7 @@ public class newUserPopUp {
                 j = new Joueur(false );
                 j.setNom(textField.getText() );
                 jeu.setMyCurrentPlayer(j);
-                Partie newP = new Partie();
+                Partie newP = new Partie(true);
                 myGrid.getChildren().clear();
                 newP.getPlateau().showPlateu(myGrid);
                 j.setMyCurrentPartie(newP);
@@ -42,7 +42,6 @@ public class newUserPopUp {
            window.close();
            System.out.println(event.getEventType());
         });
-
 
         VBox vBox = new VBox(textField,okBtn);
         Scene scene = new Scene(vBox);

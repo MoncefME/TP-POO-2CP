@@ -1,6 +1,10 @@
 package Models;
 
-public class CaseParcours extends Case{
+import Controllers.MainAppView;
+
+import java.io.Serializable;
+
+public class CaseParcours extends Case implements Serializable {
     @Override
     public String hello() {
         return "[-]";
@@ -13,8 +17,7 @@ public class CaseParcours extends Case{
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

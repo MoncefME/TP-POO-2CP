@@ -1,6 +1,15 @@
 package Models;
 
-public class CaseDefinition extends CaseQuestion {
+import Controllers.MainAppView;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.io.Serializable;
+
+public class CaseDefinition extends CaseQuestion implements Serializable {
     @Override
     public String hello() {
         return "[D]";
@@ -19,8 +28,19 @@ public class CaseDefinition extends CaseQuestion {
             bonus = -10 ;
         }
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            FXMLLoader fxmlLoader = new FXMLLoader(
+                    getClass().getResource("/Views/DefinitionQuestionView.fxml"));
+            try {
+                Scene scene = new Scene(fxmlLoader.load());
+                Stage window = new Stage();
+                window.initModality(Modality.APPLICATION_MODAL);
+                window.setTitle("Definition Question");
+                window.setScene(scene);
+                window.showAndWait();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            MainAppView.clickedCASE = getId();
         });
     }
 }

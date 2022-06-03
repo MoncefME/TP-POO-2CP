@@ -1,9 +1,10 @@
 package Models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Joueur {
+public class Joueur implements Serializable {
     private int PlayerId = 0;
     private String nom;
     private int bestScore;
@@ -51,8 +52,16 @@ public class Joueur {
         this.mesParties = mesParties;
     }
     public void addPartie(Partie p){
-        mesParties.add(p);
-        p.setIdPartie(nom+"_P_"+mesParties.size());
+        if (this.getPartieById(p.getIdPartie())!=null){
+            int index = mesParties.indexOf(p);
+            mesParties.set(index,p);
+        }
+        else {
+            System.out.println("awww");
+            p.setIdPartie(nom+"_P_"+mesParties.size());
+            mesParties.add(p);
+
+        }
     }
     public  void printPlayers(){
         for(int i=0 ; i<mesParties.size() ; i++){
@@ -72,5 +81,14 @@ public class Joueur {
         for(int i=0 ; i<mesParties.size() ; i++){
             bestScore = Math.max(bestScore , mesParties.get(i).getScore());
         }
+    }
+    public Partie getPartieById(String Id){
+
+        for(int i=0 ; i<mesParties.size() ; i++){
+            if (mesParties.get(i).getIdPartie().equals(Id) ){
+                return mesParties.get(i);
+            }
+        }
+        return null;
     }
 }

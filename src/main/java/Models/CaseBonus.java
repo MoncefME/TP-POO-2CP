@@ -1,10 +1,12 @@
 package Models;
 
-public class CaseBonus extends Case{
+import Controllers.MainAppView;
+
+import java.io.Serializable;
+
+public class CaseBonus extends Case implements Serializable {
     @Override
-    public String hello() {
-        return "[B]";
-    }
+    public String hello() {return "[B]";}
 
     public CaseBonus() {
         className = "CaseBonus";
@@ -12,8 +14,7 @@ public class CaseBonus extends Case{
         step = 2;
         bonus  = 10;
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 

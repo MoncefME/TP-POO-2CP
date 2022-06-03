@@ -1,6 +1,16 @@
 package Models;
 
-public class CaseImage extends CaseQuestion{
+import Controllers.ImageQuestionController;
+import Controllers.MainAppView;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.io.Serializable;
+
+public class CaseImage extends CaseQuestion implements Serializable {
     @Override
     public String hello() {
         return "[I]";
@@ -20,8 +30,7 @@ public class CaseImage extends CaseQuestion{
         }
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

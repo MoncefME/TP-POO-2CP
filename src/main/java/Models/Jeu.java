@@ -1,15 +1,17 @@
 package Models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Map;
 
-public class Jeu {
-    private   int gameTopScore = 0;
+public class Jeu implements Serializable {
+    private   int gameTopScore ;
     private ArrayList<Joueur> players = new ArrayList<Joueur>();
     private Joueur myCurrentPlayer;
     public static Dice d1 = new Dice();
     public static Dice d2 = new Dice();
     private Boolean correctClickedCase = false;
+
+
 
     public Boolean getCorrectClickedCase() {
         return correctClickedCase;
@@ -24,10 +26,13 @@ public class Jeu {
         }
         return false;
     }
-
-    public void lancerJeu(Joueur joueur){
-        Partie partie = new Partie();
-        joueur.addPartie(partie);
+//    public void lancerjeuexist(Joueur joueur,Partie partie){
+//        joueur.addPartie(partie);
+//        joueur.setMyCurrentPartie(partie);
+//    }
+    public void lancerJeu(Joueur joueur,Boolean b){
+        Partie partie = new Partie(b);
+//        joueur.addPartie(partie);
         joueur.setMyCurrentPartie(partie);
     }
     public void endJeu(){
@@ -42,6 +47,10 @@ public class Jeu {
             }
         }
         return null;
+    }
+
+    public void setPlayers(ArrayList<Joueur> players) {
+        this.players = players;
     }
 
     public void addPlayer(Joueur j){
@@ -77,4 +86,29 @@ public class Jeu {
             gameTopScore = Math.max(gameTopScore , players.get(i).getBestScore());
         }
     }
+
+    /****************Repeated Functions*************************/
+
+    public Plateau getCurrentPlateau(){
+        return this.getCurrentPartie().getPlateau();
+    }
+    public Partie getCurrentPartie(){
+        return this.myCurrentPlayer.getMyCurrentPartie();
+    }
+    public int getCurrentPosition(){
+        return this.getCurrentPartie().getPosition();
+    }
+    public void incrementCurrentPosition(int x){
+        this.getCurrentPartie().setPosition(this.getCurrentPosition()+x);
+    }
+    public int getCurrentScore(){
+        return this.getCurrentPartie().getScore();
+    }
+    public void incrementCurrentScore(int y){
+        this.getCurrentPartie().setScore(this.getCurrentScore()+y);
+    }
+    public Case[] getCurrentPlt(){
+        return this.getCurrentPlateau().getPlt();
+    }
+
 }
