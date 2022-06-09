@@ -1,20 +1,18 @@
 package Models;
 
-public class CaseFin extends Case{
-    @Override
-    public String hello() {
-        return "[F]";
-    }
+import Controllers.MainAppView;
 
+import java.io.Serializable;
+
+public class CaseFin extends Case implements Serializable {
     public CaseFin() {
-        color = "rgba(0, 0, 0, 0.6)";
+        color = "rgba(0, 0, 0, 1)";
         className = "ClassFin";
         step = 0;
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }

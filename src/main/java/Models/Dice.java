@@ -1,6 +1,8 @@
 package Models;
 
-public class Dice {
+import java.io.Serializable;
+
+public class Dice implements Serializable {
     private int value = 0;
 
     public int getValue() {

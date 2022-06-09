@@ -1,15 +1,16 @@
 package Models;
 
-public class CaseImage extends CaseQuestion{
-    @Override
-    public String hello() {
-        return "[I]";
-    }
+
+import Controllers.MainAppView;
+import java.io.Serializable;
+
+public class CaseImage extends CaseQuestion implements Serializable {
+
 
     private boolean answer;
 
     public CaseImage() {
-        color = "rgba(255, 115, 239, 0.6)";
+        color = "rgba(255, 115, 239, 1)";
         className = "CaseImage";
         if(answer==true){
             step = 2;
@@ -20,8 +21,21 @@ public class CaseImage extends CaseQuestion{
         }
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
+
+//                FXMLLoader fxmlLoader = new FXMLLoader(
+//                    getClass().getResource("/Views/ImageQuestionView.fxml"));
+//            try {
+//                Scene scene = new Scene(fxmlLoader.load());
+//                Stage window = new Stage();
+//                window.initModality(Modality.APPLICATION_MODAL);
+//                window.setTitle("Image Question");
+//                window.setScene(scene);
+//                window.showAndWait();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
         });
     }
 }

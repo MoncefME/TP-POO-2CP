@@ -1,10 +1,11 @@
 package Models;
 
-public class CaseParcours extends Case{
-    @Override
-    public String hello() {
-        return "[-]";
-    }
+import Controllers.MainAppView;
+
+import java.io.Serializable;
+
+public class CaseParcours extends Case implements Serializable {
+
 
     public CaseParcours() {
         color = "#ffffff";// white
@@ -13,8 +14,7 @@ public class CaseParcours extends Case{
         bonus = 0;
 
         caseVbox.setOnMouseClicked(event -> {
-            System.out.println(getId());
-            setClickedId(getId());
+            MainAppView.clickedCASE = getId();
         });
     }
 }
