@@ -9,7 +9,14 @@ public class Jeu implements Serializable {
     private Joueur myCurrentPlayer;
     public static Dice d1 = new Dice();
     public static Dice d2 = new Dice();
+    private Boolean correctClickedCase = false;
 
+    public Boolean getCorrectClickedCase() {
+        return correctClickedCase;
+    }
+    public void setCorrectClickedCase(Boolean correctClickedCase) {
+        this.correctClickedCase = correctClickedCase;
+    }
 
     /******************Getters and Setters*************/
     public Joueur getPlayerByName(String name){
